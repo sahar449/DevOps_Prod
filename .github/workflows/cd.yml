@@ -131,43 +131,6 @@ jobs:
 
           echo "❌ Smoke test failed"
           exit 1
-      
-      # Trigger step (optional)
-      - name: Push image to second AWS account
-        if: ${{ success() }}
-        run: echo "Image push to second account triggered."
-
-      # Login Docker to SOURCE ECR (first account)
-      - name: Login to SOURCE ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      # Pull the image from SOURCE ECR
-      - name: Pull image from SOURCE ECR
-        run: docker pull ${{ secrets.ECR_NAME }}:latest
-
-
-      # Assume role to SECOND ACCOUNT via OIDC
-      - name: Configure AWS (SECOND ACCOUNT)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_SECOND_ACCOUNT }}
-          aws-region: "us-east-2"
-          role-session-name: github-actions-second-account
-
-      # Login Docker to SECOND ACCOUNT ECR
-      - name: Login to SECOND ACCOUNT ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      # Tag and push to SECOND ACCOUNT ECR
-      - name: Tag and Push to SECOND ACCOUNT ECR
-        env:
-          SRC_ECR: ${{ secrets.ECR_NAME }}
-          DST_ECR: ${{ secrets.ECR_NAME_SECOND }}
-          TAG: latest
-        run: |
-          docker tag "$SRC_ECR:$TAG" "$DST_ECR:$TAG"
-          docker push "$DST_ECR:$TAG"
-
 
 
 
