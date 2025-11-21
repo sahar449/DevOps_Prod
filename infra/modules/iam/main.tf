@@ -1,16 +1,86 @@
-###################################
-# helm main.tf
-###################################
-
-data "aws_caller_identity" "current" {}
 
 ###################################
-# 2. Load Balancer Controller Resources
+# Load Balancer Controller Resources
 ###################################
 
 # IAM Policy for ALB Controller
-data "aws_iam_policy" "lb_controller_policy" {
-  name = "AWSLoadBalancerControllerIAMPolicy"
+# IAM Policy for AWS Load Balancer Controller
+resource "aws_iam_policy" "lb_controller_policy" {
+  name        = "eks-lb-controller-custom-policy"
+  description = "Custom policy for AWS Load Balancer Controller on EKS"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      # Allow managing load balancers
+      {
+        Effect   = "Allow"
+        Action   = [
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeInstances",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:CreateSecurityGroup",
+          "ec2:CreateTags",
+          "ec2:DeleteTags",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupIngress",
+          "elasticloadbalancing:CreateLoadBalancer",
+          "elasticloadbalancing:DescribeLoadBalancers",
+          "elasticloadbalancing:DeleteLoadBalancer",
+          "elasticloadbalancing:DescribeLoadBalancerAttributes",
+          "elasticloadbalancing:ModifyLoadBalancerAttributes",
+          "elasticloadbalancing:AddTags",
+          "elasticloadbalancing:RemoveTags",
+          "elasticloadbalancing:CreateTargetGroup",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroupAttributes",
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets",
+          "elasticloadbalancing:DescribeTargetHealth",
+          "elasticloadbalancing:CreateListener",
+          "elasticloadbalancing:DescribeListeners",
+          "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:ModifyListener",
+          "elasticloadbalancing:AddListenerCertificates",
+          "elasticloadbalancing:RemoveListenerCertificates",
+          "elasticloadbalancing:ModifyListenerCertificates",
+          "elasticloadbalancing:CreateRule",
+          "elasticloadbalancing:DeleteRule",
+          "elasticloadbalancing:ModifyRule",
+          "elasticloadbalancing:SetWebAcl"
+        ]
+        Resource = "*"
+      },
+
+      # Allow tagging resources
+      {
+        Effect   = "Allow"
+        Action   = [
+          "iam:CreateServiceLinkedRole",
+          "iam:GetServerCertificate",
+          "iam:ListServerCertificates"
+        ]
+        Resource = "*"
+      },
+
+      # Optional: allow logging & cloudwatch
+      {
+        Effect   = "Allow"
+        Action   = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams",
+          "logs:PutLogEvents"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 # IAM Role for ALB Controller (IRSA)
@@ -37,14 +107,14 @@ resource "aws_iam_role" "lb_controller_role" {
   })
 }
 
-# Attach existing AWS policy to role
+# Attach custom policy to role
 resource "aws_iam_role_policy_attachment" "lb_controller_attach" {
   role       = aws_iam_role.lb_controller_role.name
-  policy_arn = data.aws_iam_policy.lb_controller_policy.arn
+  policy_arn = aws_iam_policy.lb_controller_policy.arn
 }
 
 ###################################
-# 3. External DNS Resources
+# External DNS Resources
 ###################################
 
 # Custom IAM Policy for Route53 access
