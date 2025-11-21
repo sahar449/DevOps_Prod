@@ -46,16 +46,31 @@ jobs:
           cd infra
           terraform init -upgrade
 
+      # ==========================
+      # APPLY
+      # ==========================
       - name: Terraform Apply
+        id: apply_step
         if: ${{ github.event.inputs.action == 'apply' }}
         run: |
           cd infra
           terraform apply -auto-approve
 
-      - name: Terraform Destroy
+      # ==========================
+      # DESTROY (manual)
+      # ==========================
+      - name: Terraform Destroy (manual)
         if: ${{ github.event.inputs.action == 'destroy' }}
         run: |
           cd infra
           terraform destroy -auto-approve
 
-  
+      # ==========================
+      # DESTROY ON FAILURE
+      # ==========================
+      - name: Destroy on failure
+        if: ${{ failure() && github.event.inputs.action == 'apply' }}
+        run: |
+          echo "Terraform Apply FAILED — running destroy!"
+          cd infra
+          terraform destroy -auto-approve
