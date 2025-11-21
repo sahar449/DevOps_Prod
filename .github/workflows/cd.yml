@@ -160,55 +160,55 @@ jobs:
 
 
 
-       # ========== DESTROY ==========
-      - name: Destroy Everything
-        if: github.event.inputs.action == 'destroy' || failure()
-        run: |
-          echo "🗑️ Starting cleanup..."
-          aws eks update-kubeconfig --region "${{ env.AWS_REGION }}" --name "${{ env.CLUSTER_NAME }}" || true
-          echo "🔧 Removing Kubernetes finalizers..."
-          kubectl get applicationset.argoproj.io -n argocd -o name 2>/dev/null | \
-            xargs -r -I {} kubectl patch {} -n argocd -p '{"metadata":{"finalizers":[]}}' --type=merge || true
-          kubectl get applications.argoproj.io -n argocd -o name 2>/dev/null | \
-            xargs -r -I {} kubectl patch {} -n argocd -p '{"metadata":{"finalizers":[]}}' --type=merge || true
-          kubectl get ingress -A -o name 2>/dev/null | \
-            xargs -r -I {} kubectl patch {} -p '{"metadata":{"finalizers":[]}}' --type=merge || true
-          echo "🗑️ Deleting ingresses..."
-          kubectl delete ingress --all -A --timeout=60s || true
-          echo "🗑️ Deleting ArgoCD ApplicationSets..."
-          kubectl delete applicationset.argoproj.io --all -n argocd --timeout=60s || true
-          echo "🗑️ Deleting ArgoCD Applications..."
-          kubectl delete applications.argoproj.io --all -n argocd --timeout=60s || true
-          echo "🗑️ Uninstalling ArgoCD..."
-          helm uninstall argocd -n argocd --timeout=2m || true
+  #      # ========== DESTROY ==========
+  #     - name: Destroy Everything
+  #       if: github.event.inputs.action == 'destroy' || failure()
+  #       run: |
+  #         echo "🗑️ Starting cleanup..."
+  #         aws eks update-kubeconfig --region "${{ env.AWS_REGION }}" --name "${{ env.CLUSTER_NAME }}" || true
+  #         echo "🔧 Removing Kubernetes finalizers..."
+  #         kubectl get applicationset.argoproj.io -n argocd -o name 2>/dev/null | \
+  #           xargs -r -I {} kubectl patch {} -n argocd -p '{"metadata":{"finalizers":[]}}' --type=merge || true
+  #         kubectl get applications.argoproj.io -n argocd -o name 2>/dev/null | \
+  #           xargs -r -I {} kubectl patch {} -n argocd -p '{"metadata":{"finalizers":[]}}' --type=merge || true
+  #         kubectl get ingress -A -o name 2>/dev/null | \
+  #           xargs -r -I {} kubectl patch {} -p '{"metadata":{"finalizers":[]}}' --type=merge || true
+  #         echo "🗑️ Deleting ingresses..."
+  #         kubectl delete ingress --all -A --timeout=60s || true
+  #         echo "🗑️ Deleting ArgoCD ApplicationSets..."
+  #         kubectl delete applicationset.argoproj.io --all -n argocd --timeout=60s || true
+  #         echo "🗑️ Deleting ArgoCD Applications..."
+  #         kubectl delete applications.argoproj.io --all -n argocd --timeout=60s || true
+  #         echo "🗑️ Uninstalling ArgoCD..."
+  #         helm uninstall argocd -n argocd --timeout=2m || true
 
 
-  destroy-bootstrap:
-    needs: deploy
-    if: github.event.inputs.action == 'destroy' && success()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # destroy-bootstrap:
+  #   needs: deploy
+  #   if: github.event.inputs.action == 'destroy' && success()
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.7
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: 1.5.7
 
-      - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ env.AWS_REGION }}
-          role-session-name: github-actions
+  #     - name: Configure AWS
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  #         aws-region: ${{ env.AWS_REGION }}
+  #         role-session-name: github-actions
 
-      - name: Terraform Init
-        run: |
-          cd infra
-          terraform init -upgrade
+  #     - name: Terraform Init
+  #       run: |
+  #         cd infra
+  #         terraform init -upgrade
 
-      - name: Destroy Bootstrap Infra
-        run: |
-          cd infra
-          terraform destroy -auto-approve
+  #     - name: Destroy Bootstrap Infra
+  #       run: |
+  #         cd infra
+  #         terraform destroy -auto-approve
