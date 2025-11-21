@@ -86,7 +86,18 @@ jobs:
             --set server.service.type=LoadBalancer \
             --set-string server.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-type"=classic \
             --set server.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-name"="${{ env.ARGOCD_CLB }}"
+
+          echo "⏳ Waiting for argocd-server rollout..."
           kubectl -n argocd rollout status deployment/argocd-server --timeout=5m
+
+          # Get the LoadBalancer DNS
+          ARGOCD_LB_DNS=$(kubectl -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "🌐 ArgoCD LoadBalancer DNS: $ARGOCD_LB_DNS"
+
+          # Get initial admin password
+          ARGOCD_ADMIN_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 --decode)
+          echo "🔑 ArgoCD initial admin password: $ARGOCD_ADMIN_PASSWORD"
+
 
       # Deploy apps
       - name: Get VPC and Deploy Apps
