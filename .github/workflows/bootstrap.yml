@@ -12,6 +12,10 @@ on:
           - apply
           - destroy
 
+  repository_dispatch:
+    types: [trigger-from-bootstrap]
+
+
 permissions:
   id-token: write
   contents: read

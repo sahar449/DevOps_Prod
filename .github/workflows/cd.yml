@@ -132,8 +132,6 @@ jobs:
           echo "❌ Smoke test failed"
           exit 1
 
-
-
        # ========== DESTROY ==========
       - name: Destroy Everything
         if: github.event.inputs.action == 'destroy' || failure()
