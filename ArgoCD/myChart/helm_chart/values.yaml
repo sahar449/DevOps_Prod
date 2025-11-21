@@ -29,13 +29,13 @@ ingress:
     alb.ingress.kubernetes.io/load-balancer-attributes: deletion_protection.enabled=false
     alb.ingress.kubernetes.io/target-group-attributes: deregistration_delay.timeout_seconds=10
   hosts:
-    - host: www.saharbittman.com
+    - host: www.saharbittman.net
       paths:
         - path: /
           pathType: Prefix
   tls:
     - hosts:
-        - '*.saharbittman.com'
+        - '*.saharbittman.net'
 resources:
   requests:
     memory: 128Mi

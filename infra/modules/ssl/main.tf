@@ -1,17 +1,17 @@
 ### main ssl ###
 
 data "aws_route53_zone" "selected" {
-  name         = "saharbittman.com."
+  name         = "saharbittman.net."
   private_zone = false
 }
 
 
 resource "aws_acm_certificate" "ssl_cert" {
-  domain_name       = "saharbittman.com"
+  domain_name       = "saharbittman.net"
   validation_method = "DNS"
 
   subject_alternative_names = [
-    "*.saharbittman.com" 
+    "*.saharbittman.net" 
   ]
 
   tags = {

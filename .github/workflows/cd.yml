@@ -107,7 +107,7 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply' || github.event_name == 'workflow_run' }}
         run: |
           for i in {1..100}; do
-            http_status=$(curl -s -o /dev/null -w "%{http_code}" https://www.saharbittman.com || echo "000")
+            http_status=$(curl -s -o /dev/null -w "%{http_code}" https://www.saharbittman.net || echo "000")
 
             if [ "$http_status" = "200" ]; then
               echo "✅ App is live! ($http_status)"

@@ -12,7 +12,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/sahar449/DevOps_EndtoEnd.git
+    repoURL: https://github.com/sahar449/DevOps_Prod.git
     targetRevision: HEAD
     path: ArgoCD/myChart/helm_chart
     helm:
